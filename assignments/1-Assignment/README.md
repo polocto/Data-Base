@@ -1,5 +1,5 @@
 ## Query 1
-
+>The countries of residence the supplier had to ship products to in 2014
 ```sql
  SELECT
   DISTINCT c.residence
@@ -14,6 +14,7 @@ WHERE
 ---
 
 ## Query 2
+>For each known country of origin, its name, the number of products from that country, their lowest price, their highest price
 
 ```sql
 SELECT
@@ -61,6 +62,7 @@ ORDER BY cname, price DESC, pid
 ---
 
 ## Query 5
+>The customers who only ordered products originating from their country
 
 ```sql
 SELECT
@@ -86,6 +88,7 @@ WHERE
 ---
 
 ## Query 6
+>The customers who ordered only products originating from foreign countries 
 
 ```sql
 SELECT
@@ -159,6 +162,7 @@ months =12
 ---
 
 ## Query 9
+>The customers who ordered all the products that cost less than $5
 
 ```sql
 SELECT
@@ -185,6 +189,7 @@ having
 ---
 
 ## Query 10
+>The customers who ordered the greatest number of common products. Display 3 columns: cname1, cname2, number of common products, with cname1 < cname2
 
 ```sql
 SELECT
@@ -256,6 +261,7 @@ HAVING
 ---
 
 ## Query 11
+>The customers who ordered the largest number of products
 
 ```sql
 SELECT
@@ -287,6 +293,7 @@ HAVING
 ---
 
 ## Query 12
+>The products ordered by all the customers living in 'France'
 
 ```sql
 SELECT
@@ -302,6 +309,7 @@ WHERE
 ---
 
 ## Query 13
+>The customers who live in the same country customers named 'Smith' live in (customers 'Smith' not shown in the result)
 
 ```sql
 SELECT
@@ -321,8 +329,8 @@ WHERE
 ```
 
 ---
-
 ## Query 14
+>The customers who ordered the largest total amount in 2014
 
 ```sql
 SELECT
@@ -360,6 +368,7 @@ HAVING
 ---
 
 ## Query 15
+>The products with the largest per-order average amount 
 
 ```sql
 SELECT
@@ -407,6 +416,7 @@ HAVING
 ---
 
 ## Query 16
+>The products ordered by the customers living in 'USA'
 
 ```sql
 SELECT
@@ -458,6 +468,7 @@ ORDER BY cname1, cname2
 ---
 
 ## Query 18
+>The products whose price is greater than all products from 'India'
 
 ```sql
 
@@ -491,6 +502,7 @@ HAVING
 ---
 
 ## Query 19
+>The products ordered by the smallest number of customers (products never ordered are excluded)
 
 ```sql
 SELECT
@@ -522,6 +534,7 @@ HAVING
 ---
 
 ## Query 20
+>For all countries listed in tables products or customers, including unknown countries: the name of the country, the number of customers living in this country, the number of products originating from that country
 
 ```sql
 SELECT

@@ -53,9 +53,11 @@ HAVING COUNT(pid) >= (SELECT COUNT(DISTINCT pid) FROM orders NATURAL JOIN custom
 > For each customer and each product, the customer's name, the product's name, the total amount ordered by the customer for that product, sorted by customer name (alphabetical order), then by total amount ordered (highest value first), then by product id (ascending order)
 
 ```sql
-SELECT * FROM customers
-NATURAL JOIN orders NATURAL JOIN products
-GROUP BY pid, cid
+SELECT DISTINCT c.cname, p.pname, o.quantity*p.price as price
+FROM customers as c
+NATURAL JOIN orders as o 
+NATURAL JOIN products as p
+GROUP BY cid, pid
 ORDER BY cname, price DESC, pid
 ```
 

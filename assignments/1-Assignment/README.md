@@ -521,119 +521,20 @@ HAVING
 >For all countries listed in tables products or customers, including unknown countries: the name of the country, the number of customers living in this country, the number of products originating from that country
 
 ```sql
-SELECT
-  *
+SELECT country, MAX(numberCID) AS "Number of resident", MAX(numberPID) AS "Number of product"
 FROM
-  (
-    SELECT
-      DISTINCT country,
-      COUNT(customers.cid) as resident
-    FROM
-      (
-        SELECT
-          DISTINCT country
-        FROM
-          (
-            SELECT
-              residence as country
-            FROM
-              customers
-          ) residenceCountry
-        UNION
-          (
-            SELECT
-              origin as country
-            FROM
-              products
-          )
-      ) FULL
-      JOIN customers ON country = customers.residence
-    GROUP BY
-      country
-  ) tab1
-  LEFT JOIN (
-    SELECT
-      DISTINCT country,
-      COUNT(products.pid) as product
-    FROM
-      (
-        SELECT
-          DISTINCT country
-        FROM
-          (
-            SELECT
-              residence as country
-            FROM
-              customers
-          ) residenceCountry
-        UNION
-          (
-            SELECT
-              origin as country
-            FROM
-              products
-          )
-      ) FULL
-      JOIN products ON country = origin
-    GROUP BY
-      country
-  ) tab2 USING(country)
+(
+(
+    SELECT origin AS country, 0 AS numberCID, COUNT(DISTINCT pid) AS numberPID
+    FROM products
+    GROUP BY origin
+)
 UNION
-SELECT
-  country, resident, product
-FROM
-  (
-    SELECT
-      DISTINCT country,
-      COUNT(customers.cid) as resident
-    FROM
-      (
-        SELECT
-          DISTINCT country
-        FROM
-          (
-            SELECT
-              residence as country
-            FROM
-              customers
-          ) residenceCountry
-        UNION
-          (
-            SELECT
-              origin as country
-            FROM
-              products
-          )
-      ) FULL
-      JOIN customers ON country = customers.residence
-    GROUP BY
-      country
-  ) tab1
-  RIGHT JOIN (
-    SELECT
-      DISTINCT country,
-      COUNT(products.pid) as product
-    FROM
-      (
-        SELECT
-          DISTINCT country
-        FROM
-          (
-            SELECT
-              residence as country
-            FROM
-              customers
-          ) residenceCountry
-        UNION
-          (
-            SELECT
-              origin as country
-            FROM
-              products
-          )
-      ) FULL
-      JOIN products ON country = origin
-    GROUP BY
-      country
-  ) tab2 USING(country);
+(
+    SELECT residence, COUNT(DISTINCT cid), 0
+    FROM customers
+    GROUP BY residence
+)) t
+
+GROUP BY country
 ```

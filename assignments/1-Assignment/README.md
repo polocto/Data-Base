@@ -197,26 +197,22 @@ HAVING
 SELECT
   cname1,
   cname2,
-  COUNT(tab1.pname) AS numberOfProducts
+  COUNT(tab1.pid) AS numberOfProducts
 FROM(
     SELECT
-      DISTINCT p.pname,
-      p.pid,
+      DISTINCT o.pid,
       c.cname AS cname1
     FROM
       customers c NATURAL
-      JOIN orders o NATURAL
-      JOIN products p
+      JOIN orders o
   ) tab1
   INNER JOIN (
     SELECT
-      DISTINCT p.pname,
-      p.pid,
+      DISTINCT o.pid,
       c.cname AS cname2
     FROM
       customers c NATURAL
-      JOIN orders o NATURAL
-      JOIN products p
+      JOIN orders o
   ) tab2 ON tab1.pid = tab2.pid
   AND tab1.cname1 < tab2.cname2
 GROUP BY
@@ -229,28 +225,22 @@ HAVING
     FROM
       (
         SELECT
-          cname1,
-          cname2,
-          COUNT(tab1.pname) AS m
+          COUNT(tab1.pid) AS m
         FROM(
             SELECT
-              DISTINCT p.pname,
-              p.pid,
+              DISTINCT o.pid,
               c.cname AS cname1
             FROM
               customers c NATURAL
-              JOIN orders o NATURAL
-              JOIN products p
+              JOIN orders o
           ) tab1
           INNER JOIN (
             SELECT
-              DISTINCT p.pname,
-              p.pid,
+              DISTINCT  o.pid,
               c.cname AS cname2
             FROM
               customers c NATURAL
-              JOIN orders o NATURAL
-              JOIN products p
+              JOIN orders o
           ) tab2 ON tab1.pid = tab2.pid
           AND tab1.cname1 < tab2.cname2
         GROUP BY

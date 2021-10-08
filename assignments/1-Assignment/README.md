@@ -436,33 +436,29 @@ WHERE
 > The pairs of customers who ordered the same product en 2014, and that product. Display 3 columns: cname1, cname2, pname, with cname1 < cname2
 
 ```sql
-SELECT cname1, cname2, pname
+SELECT  cname1, cname2, pname
 
 FROM
 
 (
-        SELECT cname as cname1, pid, pname
+        SELECT DISTINCT cname as cname1, pid, pname
         FROM customers
         NATURAL JOIN orders
         NATURAL JOIN products
         WHERE YEAR(odate)=2014
-        ORDER BY cname
         )table1
 
 INNER JOIN
 
 (
-        SELECT cname as cname2, pid
+        SELECT DISTINCT cname as cname2, pid
         FROM customers
         NATURAL JOIN orders
         NATURAL JOIN products
         WHERE YEAR(odate)=2014
-        ORDER BY cname
         )table2
 
 ON table1.pid = table2.pid AND table1.cname1 < table2.cname2
-
-ORDER BY cname1, cname2
 ```
 
 ---

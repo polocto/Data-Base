@@ -318,7 +318,7 @@ SELECT
   c.cname
 FROM
   customers c
-WHERE
+WHERE c.residence IN
   (
     SELECT
       c.residence
@@ -326,7 +326,7 @@ WHERE
       customers c
     WHERE
       c.cname = "Smith"
-  ) = c.residence
+  )  
   AND c.cname != "Smith";
 ```
 

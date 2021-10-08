@@ -43,7 +43,7 @@ WHERE YEAR(odate) = 2014 AND pid IN
     FROM orders NATURAL JOIN customers
     WHERE cname='Smith' AND YEAR(odate) = 2013
 ) GROUP BY cid
-HAVING COUNT(pid) >= (SELECT COUNT(DISTINCT pid) FROM orders NATURAL JOIN customers WHERE cname='Smith' AND YEAR(odate) = 2013)
+HAVING COUNT(pid) >= (SELECT COUNT(DISTINCT pid) FROM orders NATURAL JOIN customers WHERE cname='Smith' AND YEAR(odate) = 2013);
 ```
 
 ---
@@ -54,11 +54,11 @@ HAVING COUNT(pid) >= (SELECT COUNT(DISTINCT pid) FROM orders NATURAL JOIN custom
 
 ```sql
 SELECT DISTINCT c.cname, p.pname, o.quantity*p.price as price
-FROM customers as c
-NATURAL JOIN orders as o 
-NATURAL JOIN products as p
+FROM customers AS c
+NATURAL JOIN orders AS o 
+NATURAL JOIN products AS p
 GROUP BY cid, pid
-ORDER BY cname, price DESC, pid
+ORDER BY cname, price DESC, pid;
 ```
 
 ---
@@ -152,7 +152,7 @@ SELECT products.*
 FROM products
 NATURAL JOIN
 (
-    SELECT pid, COUNT(DISTINCT MONTH(odate)) as months
+    SELECT pid, COUNT(DISTINCT MONTH(odate)) AS months
     FROM orders
     WHERE YEAR(odate)=2014
     GROUP BY pid
@@ -175,12 +175,12 @@ FROM
   INNER JOIN products p ON o.pid = p.pid
 WHERE
   p.price < 5
-group by
+GROUP BY
   c.cid
-having
-  count(distinct p.pid) = (
+HAVING
+  COUNT(DISTINCT p.pid) = (
     SELECT
-      count(distinct products.pid)
+      COUNT(DISTINCT products.pid)
     FROM
       products
     WHERE
@@ -197,12 +197,12 @@ having
 SELECT
   cname1,
   cname2,
-  COUNT(tab1.pname) as numberOfProducts
+  COUNT(tab1.pname) AS numberOfProducts
 FROM(
     SELECT
       DISTINCT p.pname,
       p.pid,
-      c.cname as cname1
+      c.cname AS cname1
     FROM
       customers c NATURAL
       JOIN orders o NATURAL
@@ -212,7 +212,7 @@ FROM(
     SELECT
       DISTINCT p.pname,
       p.pid,
-      c.cname as cname2
+      c.cname AS cname2
     FROM
       customers c NATURAL
       JOIN orders o NATURAL
@@ -231,12 +231,12 @@ HAVING
         SELECT
           cname1,
           cname2,
-          COUNT(tab1.pname) as m
+          COUNT(tab1.pname) AS m
         FROM(
             SELECT
               DISTINCT p.pname,
               p.pid,
-              c.cname as cname1
+              c.cname AS cname1
             FROM
               customers c NATURAL
               JOIN orders o NATURAL
@@ -246,7 +246,7 @@ HAVING
             SELECT
               DISTINCT p.pname,
               p.pid,
-              c.cname as cname2
+              c.cname AS cname2
             FROM
               customers c NATURAL
               JOIN orders o NATURAL
@@ -379,7 +379,7 @@ SELECT
 FROM
   (
     SELECT
-      price * quantity as total,
+      price * quantity AS total,
       products.*
     FROM
       products NATURAL
@@ -394,13 +394,13 @@ HAVING
     FROM
       (
         SELECT
-          AVG(total) as m,
+          AVG(total) AS m,
           pid,
           pname
         FROM
           (
             SELECT
-              price * quantity as total,
+              price * quantity AS total,
               pid,
               pname
             FROM
@@ -441,7 +441,7 @@ SELECT  cname1, cname2, pname
 FROM
 
 (
-        SELECT DISTINCT cname as cname1, pid, pname
+        SELECT DISTINCT cname AS cname1, pid, pname
         FROM customers
         NATURAL JOIN orders
         NATURAL JOIN products
@@ -451,7 +451,7 @@ FROM
 INNER JOIN
 
 (
-        SELECT DISTINCT cname as cname2, pid
+        SELECT DISTINCT cname AS cname2, pid
         FROM customers
         NATURAL JOIN orders
         NATURAL JOIN products

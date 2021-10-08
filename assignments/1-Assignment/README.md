@@ -337,7 +337,7 @@ WHERE c.residence IN
 ```sql
 SELECT
   c.*,
-  SUM(p.price * o.quantity)
+  SUM(p.price * o.quantity) AS "Total Amount"
 FROM
   customers c NATURAL
   JOIN orders o NATURAL
@@ -363,8 +363,6 @@ HAVING
           c.cid
       ) q
   );
-
-
 ```
 
 ---

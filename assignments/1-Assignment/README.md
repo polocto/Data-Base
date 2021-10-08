@@ -499,13 +499,12 @@ FROM
 GROUP BY
   p.pid
 HAVING
-  SUM(o.quantity) = (
+  COUNT(DISTINCT cid) = (
     SELECT
       MIN(m)
     FROM(
         SELECT
-          p.*,
-          SUM(o.quantity) AS m
+          COUNT(DISTINCT cid) AS m
         FROM
           customers c NATURAL
           JOIN orders o NATURAL

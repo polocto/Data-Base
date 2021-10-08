@@ -10,9 +10,7 @@ select
   user(),
   database();
 -- Conform to standard group by constructs
-set
-  session sql_mode = 'ONLY_FULL_GROUP_BY';
--- Write the SQL queries that return the information below:
+  -- Write the SQL queries that return the information below:
   -- Ecrire les requêtes SQL retournant les informations ci-dessous:
 select
   'Query 01' as '';

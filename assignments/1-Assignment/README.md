@@ -138,7 +138,7 @@ SELECT (
                 NATURAL JOIN customers
                 WHERE residence = 'France'
         )q2
-)
+);
 ```
 
 ---
@@ -158,7 +158,7 @@ NATURAL JOIN
     GROUP BY pid
 ) tabmonths
 WHERE
-months =12
+months =12;
 ```
 
 ---
@@ -448,7 +448,7 @@ INNER JOIN
         WHERE YEAR(odate)=2014
         )table2
 
-ON table1.pid = table2.pid AND table1.cname1 < table2.cname2
+ON table1.pid = table2.pid AND table1.cname1 < table2.cname2;
 ```
 
 ---
@@ -471,7 +471,7 @@ WHERE
       JOIN products p
     WHERE
       p.origin = "India"
-  ) 
+  );
 ```
 
 ---
@@ -526,5 +526,5 @@ UNION
     GROUP BY residence
 )) t
 
-GROUP BY country
+GROUP BY country;
 ```

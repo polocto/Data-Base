@@ -21,7 +21,7 @@ SELECT
   p.origin,
   COUNT(*) AS numberOfProduct,
   MIN(p.price) AS MinPrice,
-  MAX(p.price) AS maxPrice,
+  MAX(p.price) AS maxPrice
 FROM
   products p
 GROUP BY

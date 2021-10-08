@@ -467,32 +467,21 @@ ON table1.pid = table2.pid AND table1.cname1 < table2.cname2
 >The products whose price is greater than all products from 'India'
 
 ```sql
-
-  SELECT p.* FROM products p WHERE p.price > (SELECT
-  DISTINCT p.price
+SELECT
+  p.*
 FROM
-  customers c NATURAL
-  JOIN orders o NATURAL
-  JOIN products p
+  products p
 WHERE
-  p.origin = "India"
-HAVING
-  p.price = (
+  p.price > (
     SELECT
-      MAX(m)
+      MAX(p.price)
     FROM
-      (
-        SELECT
-          p.price AS m
-        FROM
-          customers c NATURAL
-          JOIN orders o NATURAL
-          JOIN products p
-        WHERE
-          p.origin  = "India"
-      ) q
-  ));
-
+      customers c NATURAL
+      JOIN orders o NATURAL
+      JOIN products p
+    WHERE
+      p.origin = "India"
+  ) 
 ```
 
 ---

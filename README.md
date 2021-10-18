@@ -2,7 +2,7 @@
 
 This repository regroup the different assignments in **Data Base**.
 
-Click to modify the [actual assignment](assignments/1-Assignment)
+Click to modify the [actual assignment](assignments/2-Assignment)
 
 
 

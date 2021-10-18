@@ -65,9 +65,9 @@ public class DataAccess {
 
     // connect to the database
       Class.forName("com.mysql.jdbc.Driver");
-      System.out.println("Hello ");
       connection = DriverManager.getConnection(url, login, password);
-      System.out.println("World!!");
+      System.out.println("AutoCommit : " + connection.getAutoCommit());
+      System.out.println("Transaction Isolation : " + connection.getTransactionIsolation());
 
   }
 

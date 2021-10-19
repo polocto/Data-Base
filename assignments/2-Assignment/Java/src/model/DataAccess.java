@@ -68,7 +68,26 @@ public class DataAccess {
       connection = DriverManager.getConnection(url, login, password);
       connection.setAutoCommit(false);
       System.out.println("AutoCommit : " + connection.getAutoCommit());
-      System.out.println("Transaction Isolation : " + connection.getTransactionIsolation());
+      int transaction = connection.getTransactionIsolation();
+      System.out.print("Transaction Isolation (" + transaction + ") : ");
+      switch(transaction)
+      {
+        case 0:
+        System.out.println("TRANSACTION_NONE");
+        break;
+        case 1:
+        System.out.println("TRANSACTION_READ_UNCOMMITTED");
+        break;
+        case 2:
+        System.out.println("TRANSACTION_READ_COMMITTED");
+        break;
+        case 4:
+        System.out.println("TRANSACTION_REPEATABLE_READ");
+        break;
+        default:
+        System.out.println("TRANSACTION_SERIALIZABLE");
+        break;
+      }
 
   }
 
@@ -76,42 +95,37 @@ public class DataAccess {
 
     // create a statement; whatever happens, the try-with-resource construct
     // will close the statement, which in turn will close the result set
+    // convert the result set to a list
+    List<EmployeeInfo> list = new ArrayList<>();
     try (Statement statement = connection.createStatement()) {
 
       // execute the query
       ResultSet result = statement.executeQuery(
           "select EID, ENAME, SAL from EMP");
 
-      // convert the result set to a list
-      List<EmployeeInfo> list = new ArrayList<>();
       while (result.next()) {
-        if (true) {
-          // accessing attributes by rank: 1, 2 & 3
-          list.add(new EmployeeInfo(result.getInt(1),
-              result.getString(2),
-              result.getFloat(3)));
-        } else {
-          // accesing attributes by name: EID, ENAME & SAL
-          list.add(new EmployeeInfo(result.getInt("EID"), result
-              .getString("EBAME"), result.getFloat("SAL")));
-        }
+        // accessing attributes by rank: 1, 2 & 3
+        list.add(new EmployeeInfo(result.getInt(1),
+            result.getString(2),
+            result.getFloat(3)));
       }
       connection.commit();
-      return list;
-
+      
     }catch(SQLException e)
     {
       connection.rollback();
       close();
       System.exit(1);
     }
-
+    
+    return list;
   }
 
   public synchronized List<EmployeeInfo> getEmployeesPS() throws SQLException {
 
     // create the prepared statement, if not created yet (lazy initialisation
     // design pattern)
+    List<EmployeeInfo> list = new ArrayList<>();
       try{
         if (getEmployeesPS == null) {
           getEmployeesPS = connection.prepareStatement(
@@ -122,35 +136,34 @@ public class DataAccess {
         // construct will close the result set
         try (ResultSet result = getEmployeesPS.executeQuery()) {
 
-          List<EmployeeInfo> list = new ArrayList<>();
           while (result.next()) {
             list.add(new EmployeeInfo(result.getInt(1), result.getString(2),
                 result.getFloat(3)));
           }
           connection.commit();
-          return list;
+        }
       }
-    }
-    catch(SQLException e)
-    {
-      connection.rollback();
-      close();
-      System.exit(1);
-    }
+      catch(SQLException e)
+      {
+        connection.rollback();
+        close();
+        System.exit(1);
+      }
+      return list;
 
   }
 
   public synchronized boolean raiseSalary(String job, double amount)
       throws SQLException {
+        int r=0;
     try {
       Statement statement = connection.createStatement();
   
       // do not forget to enclose string litterals (e.g. job) between single quotes:
       String query = "update EMP set SAL = SAL + " + amount + " where JOB = '" + job + "'";
-      int r = statement.executeUpdate(query);
+      r = statement.executeUpdate(query);
       connection.commit();
       // at least one tuple should have been updated:
-      return r >= 1;
       
     } catch(SQLException e)
     {
@@ -158,12 +171,13 @@ public class DataAccess {
       close();
       System.exit(1);
     }
+    return r >= 1;
 
   }
 
   public synchronized boolean raiseSalaryPS(String job, double amount)
       throws SQLException {
-
+        boolean r =false;
     try {
       if (updateSalaryPS == null) {
         updateSalaryPS = connection.prepareStatement(
@@ -174,7 +188,7 @@ public class DataAccess {
       updateSalaryPS.setDouble(1, amount);
       updateSalaryPS.setString(2, job);
       connection.commit();
-      return updateSalaryPS.executeUpdate() >= 1;
+      r = updateSalaryPS.executeUpdate() >= 1;
       
     } catch(SQLException e)
     {
@@ -182,6 +196,7 @@ public class DataAccess {
       close();
       System.exit(1);
     }
+    return r;
 
   }
 
@@ -200,26 +215,26 @@ public class DataAccess {
     if (location != null) {
       query += " and DLOC = '" + location + "'";
     }
-
+    
+    List<DepartmentInfo> list = new ArrayList<>();
     try (Statement statement = connection.createStatement()) {
 
       ResultSet result = statement.executeQuery(query);
 
-      List<DepartmentInfo> list = new ArrayList<>();
       while (result.next()) {
         list.add(new DepartmentInfo(result.getInt(1),
             result.getString(2),
             result.getString(3)));
       }
       connection.commit();
-      return list;
-
+      
     }catch(SQLException e)
     {
       connection.rollback();
       close();
       System.exit(1);
     }
+    return list;
 
   }
 
@@ -260,24 +275,24 @@ public class DataAccess {
       index += 1;
       getDepartementsPS.setString(index, location);
     }
+    List<DepartmentInfo> list = new ArrayList<>();
 
     try (ResultSet result = getDepartementsPS.executeQuery()) {
 
-      List<DepartmentInfo> list = new ArrayList<>();
       while (result.next()) {
         list.add(new DepartmentInfo(result.getInt(1),
             result.getString(2),
             result.getString(3)));
       }
       connection.commit();
-      return list;
-
+      
     }catch(SQLException e)
     {
       connection.rollback();
       close();
       System.exit(1);
     }
+    return list;
 
   }
 
@@ -285,6 +300,7 @@ public class DataAccess {
 
     // execute the query using a statement: we cannot use a prepared statement
     // since the query can change from one call to the next
+    List<String> list = new ArrayList<>();
     try (Statement statement = connection.createStatement()) {
       ResultSet result = statement.executeQuery(query);
 
@@ -292,7 +308,6 @@ public class DataAccess {
       ResultSetMetaData metaData = result.getMetaData();
 
       // list attributes, i.e. column names
-      List<String> list = new ArrayList<>();
       String attributes = "| ";
       for (int index = 1; index <= metaData.getColumnCount(); index++) {
         attributes += metaData.getColumnName(index) + " | ";
@@ -308,18 +323,19 @@ public class DataAccess {
         list.add(tuple);
       }
       connection.commit();
-      return list;
-
+      
     }catch(SQLException e)
     {
       connection.rollback();
       close();
       System.exit(1);
     }
+    return list;
   }
 
   public List<String> executeStatement(String statement) throws SQLException {
 
+    List<String> list = new ArrayList<>();
     // if the statement is a query
     try {
       if (statement.toLowerCase().startsWith("select")) {
@@ -330,10 +346,8 @@ public class DataAccess {
       Statement jdbcStatement = connection.createStatement();
       int r = jdbcStatement.executeUpdate(statement);
   
-      List<String> list = new ArrayList<>();
       list.add(r + "");
       connection.commit();
-      return list;
       
     } catch(SQLException e)
     {
@@ -341,6 +355,7 @@ public class DataAccess {
       close();
       System.exit(1);
     }
+    return list;
 
   }
 

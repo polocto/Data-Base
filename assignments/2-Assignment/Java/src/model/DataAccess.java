@@ -155,13 +155,13 @@ public class DataAccess {
 
   public synchronized boolean raiseSalary(String job, double amount)
       throws SQLException {
-        int r=0;
+        boolean r=false;
     try {
       Statement statement = connection.createStatement();
   
       // do not forget to enclose string litterals (e.g. job) between single quotes:
       String query = "update EMP set SAL = SAL + " + amount + " where JOB = '" + job + "'";
-      r = statement.executeUpdate(query);
+      r = statement.executeUpdate(query)>= 1;
       connection.commit();
       // at least one tuple should have been updated:
       
@@ -171,7 +171,7 @@ public class DataAccess {
       close();
       System.exit(1);
     }
-    return r >= 1;
+    return r ;
 
   }
 

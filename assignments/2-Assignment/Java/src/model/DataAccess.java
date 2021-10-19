@@ -66,6 +66,7 @@ public class DataAccess {
     // connect to the database
       Class.forName("com.mysql.jdbc.Driver");
       connection = DriverManager.getConnection(url, login, password);
+      connection.setAutoCommit(false);
       System.out.println("AutoCommit : " + connection.getAutoCommit());
       System.out.println("Transaction Isolation : " + connection.getTransactionIsolation());
 
@@ -95,9 +96,14 @@ public class DataAccess {
               .getString("EBAME"), result.getFloat("SAL")));
         }
       }
-
+      connection.commit();
       return list;
 
+    }catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
 
   }
@@ -106,61 +112,83 @@ public class DataAccess {
 
     // create the prepared statement, if not created yet (lazy initialisation
     // design pattern)
-    if (getEmployeesPS == null) {
-      getEmployeesPS = connection.prepareStatement(
-          "select EID, ENAME, SAL from EMP");
-    }
+      try{
+        if (getEmployeesPS == null) {
+          getEmployeesPS = connection.prepareStatement(
+              "select EID, ENAME, SAL from EMP");
+        }
 
-    // execute the prepared statement; whatever happens, the try-with-resource
-    // construct will close the result set
-    try (ResultSet result = getEmployeesPS.executeQuery()) {
+        // execute the prepared statement; whatever happens, the try-with-resource
+        // construct will close the result set
+        try (ResultSet result = getEmployeesPS.executeQuery()) {
 
-      List<EmployeeInfo> list = new ArrayList<>();
-      while (result.next()) {
-        list.add(new EmployeeInfo(result.getInt(1), result.getString(2),
-            result.getFloat(3)));
+          List<EmployeeInfo> list = new ArrayList<>();
+          while (result.next()) {
+            list.add(new EmployeeInfo(result.getInt(1), result.getString(2),
+                result.getFloat(3)));
+          }
+          connection.commit();
+          return list;
       }
-
-      return list;
-
+    }
+    catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
 
   }
 
   public synchronized boolean raiseSalary(String job, double amount)
       throws SQLException {
-
-    Statement statement = connection.createStatement();
-
-    // do not forget to enclose string litterals (e.g. job) between single quotes:
-    String query = "update EMP set SAL = SAL + " + amount + " where JOB = '" + job + "'";
-    int r = statement.executeUpdate(query);
-
-    // at least one tuple should have been updated:
-    return r >= 1;
+    try {
+      Statement statement = connection.createStatement();
+  
+      // do not forget to enclose string litterals (e.g. job) between single quotes:
+      String query = "update EMP set SAL = SAL + " + amount + " where JOB = '" + job + "'";
+      int r = statement.executeUpdate(query);
+      connection.commit();
+      // at least one tuple should have been updated:
+      return r >= 1;
+      
+    } catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
+    }
 
   }
 
   public synchronized boolean raiseSalaryPS(String job, double amount)
       throws SQLException {
 
-    if (updateSalaryPS == null) {
-      updateSalaryPS = connection.prepareStatement(
-          "update EMP set SAL = SAL + ? where JOB = ?");
+    try {
+      if (updateSalaryPS == null) {
+        updateSalaryPS = connection.prepareStatement(
+            "update EMP set SAL = SAL + ? where JOB = ?");
+      }
+  
+      // assign a value to all query parameters ("?")
+      updateSalaryPS.setDouble(1, amount);
+      updateSalaryPS.setString(2, job);
+      connection.commit();
+      return updateSalaryPS.executeUpdate() >= 1;
+      
+    } catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
-
-    // assign a value to all query parameters ("?")
-    updateSalaryPS.setDouble(1, amount);
-    updateSalaryPS.setString(2, job);
-
-    return updateSalaryPS.executeUpdate() >= 1;
 
   }
 
   public List<DepartmentInfo> getDepartments(Integer id, String name,
       String location)
       throws SQLException {
-
+        
     // build the query string
     String query = "select DID, DNAME, DLOC from DEPT where true";
     if (id != null) {
@@ -183,9 +211,14 @@ public class DataAccess {
             result.getString(2),
             result.getString(3)));
       }
-
+      connection.commit();
       return list;
 
+    }catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
 
   }
@@ -236,9 +269,14 @@ public class DataAccess {
             result.getString(2),
             result.getString(3)));
       }
-
+      connection.commit();
       return list;
 
+    }catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
 
   }
@@ -269,27 +307,40 @@ public class DataAccess {
         }
         list.add(tuple);
       }
-
+      connection.commit();
       return list;
 
+    }catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
   }
 
   public List<String> executeStatement(String statement) throws SQLException {
 
     // if the statement is a query
-    if (statement.toLowerCase().startsWith("select")) {
-      return executeQuery(statement);
+    try {
+      if (statement.toLowerCase().startsWith("select")) {
+        return executeQuery(statement);
+      }
+  
+      // else we assume it is an update
+      Statement jdbcStatement = connection.createStatement();
+      int r = jdbcStatement.executeUpdate(statement);
+  
+      List<String> list = new ArrayList<>();
+      list.add(r + "");
+      connection.commit();
+      return list;
+      
+    } catch(SQLException e)
+    {
+      connection.rollback();
+      close();
+      System.exit(1);
     }
-
-    // else we assume it is an update
-    Statement jdbcStatement = connection.createStatement();
-    int r = jdbcStatement.executeUpdate(statement);
-
-    List<String> list = new ArrayList<>();
-    list.add(r + "");
-
-    return list;
 
   }
 

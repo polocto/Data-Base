@@ -72,6 +72,13 @@ db.employees.insertMany([
 	department: {name: "Research", location: "Dallas"},
 	missions: [
 	{company: "IBM", location: "London"}
+	]},
+
+{_id: 8876, name: "Paul", job: "student", manager: 7788, hired: new Date("1981-09-23"), salary: 1100.0, 
+	department: {name: "Research", location: "Dallas"},
+	missions: [
+		{company: "BMW", location: "Chicago"},
+		{company: "IBM", location: "London"}
 	]}
 
 ]);

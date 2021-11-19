@@ -24,7 +24,7 @@ db.company.updateMany({job: "clerk"},{$inc: { salary: 300}});
 db.company.remove({manager : {$exists: false}});
 // Move the Accounting department from New-York to Dallas
 // query: {"department": {name: "Accounting", location: "New-York"}}
-db.company.updateMany({"department": {name: "Accounting", location: "New-York"}},{$set: {"department": {name: "Accounting", location: "Dallas"}}});
+db.company.updateMany({"department": {name: "Accounting", location: "New-York"}},{$set: {"department.location": "Dallas"}});
 // Remove the missions of the employees who work in Dallas
 db.company.updateMany({"department": {location: "Dallas"}},{$unset: "missions"});
 // Rename the field "location" to "city" for departments

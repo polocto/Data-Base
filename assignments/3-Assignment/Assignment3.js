@@ -3,15 +3,15 @@ db.users.count();
 // Question 2
 db.movies.count();
 // Question 3
-db.users.find({name: "Clifford Johnathan"},{_id: 0, occupation: 1});
+db.users.find({ name: "Clifford Johnathan" }, { _id: 0, occupation: 1 });
 // Question 4
 db.users.count({ age: { $lte: 30, $gte: 18 } });
 // Question 5
-db.users.count({occupation: {$in: ["scientist","artist"]}});
+db.users.count({ occupation: { $in: ["scientist", "artist"] } });
 // Question 6
 db.users.find({}, { name: 1 }).sort({ age: -1 }).limit(10);
 // Question 7
-db.users.aggregate({$group: {_id: "$occupation"}});
+db.users.aggregate({ $group: { _id: "$occupation" } });
 // Question 8
 db.users.insertOne({
   name: "Camard Mathis",
@@ -49,17 +49,20 @@ db.users.updateMany(
   { $set: { occupation: "developer" } }
 );
 // Question 11
-db.movies.updateOne({title: {$regex: "^Cinderella"}},{$set: {genres: "Animation|Children's|Musical"}} );
+db.movies.updateOne(
+  { title: { $regex: "^Cinderella" } },
+  { $set: { genres: "Animation|Children's|Musical" } }
+);
 // Question 12
 db.movies.count({ title: { $regex: "198" } });
 // Question 13
-db.movies.count({genres: {$regex: "Horror"}});
+db.movies.count({ genres: { $regex: "Horror" } });
 // Question 14
 db.movies.count({
   $and: [{ genres: { $regex: "Musical" } }, { genres: { $regex: "Romance" } }],
 });
 // Question 15
-db.users.count({movies: {$elemMatch: {movieid: 1196}}});
+db.users.count({ movies: { $elemMatch: { movieid: 1196 } } });
 // Question 16
 db.users.count({
   $and: [
@@ -69,22 +72,29 @@ db.users.count({
   ],
 });
 // Question 17
-db.users.count({movies: {$size: 48}});
+db.users.count({ movies: { $size: 48 } });
 // Question 18
-
+db.users.updateMany({}, [
+  {
+    $set: {
+      num_ratings: { $size: "$movies" },
+    },
+  },
+]);
 // Question 19
-db.users.count({"movies.90": {$exists: true}});
+db.users.count({ "movies.90": { $exists: true } });
 // Question 20
 db.users.aggregate([
   { $match: { name: "Jayson Brad" } },
   { $project: { threeLastRated: { $slice: ["$movies.movieid", -3] } } },
 ]);
 // Question 21
-db.movies.aggregate([{$project: {year: {$split: ["$title"," "]}}},
-{$unwind: "$year"},
-{$match: {year: {$regex: /^\(199\d\)/}}},
-{$group: {_id: "$year", sum: {$sum: 1}}},
-{$sort: {sum: -1}}
+db.movies.aggregate([
+  { $project: { year: { $split: ["$title", " "] } } },
+  { $unwind: "$year" },
+  { $match: { year: { $regex: /^\(199\d\)/ } } },
+  { $group: { _id: "$year", sum: { $sum: 1 } } },
+  { $sort: { sum: -1 } },
 ]);
 // Question 22
 db.users.aggregate([
@@ -93,76 +103,87 @@ db.users.aggregate([
   { $group: { _id: "$movies.movieid", avgRating: { $avg: "$movies.rating" } } },
 ]);
 // Question 23
-db.users.aggregate([{$project: {_id:"$_id", name: "$name", max: {$max: "$movies.rating"}, min: {$min: "$movies.rating"}, avg: {$avg: "$movies.rating"}}},{$sort: {avg: -1}},{$project: {avg: 0}}]);
+db.users.aggregate([
+  {
+    $project: {
+      _id: "$_id",
+      name: "$name",
+      max: { $max: "$movies.rating" },
+      min: { $min: "$movies.rating" },
+      avg: { $avg: "$movies.rating" },
+    },
+  },
+  { $sort: { avg: -1 } },
+  { $project: { avg: 0 } },
+]);
 // Question 24
 
 // Question 25
 db.users.aggregate([
-    {
-        $unwind: "$movies"
+  {
+    $unwind: "$movies",
+  },
+  {
+    $group: {
+      _id: "$movies.movieid",
+      sum_rate: { $sum: "$movies.rating" },
+      nb_rate: { $sum: 1 },
     },
-    {
-        $group: { 
-            _id: "$movies.movieid", 
-            sum_rate: {$sum: "$movies.rating"}, 
-            nb_rate: { $sum:1}
-        }
+  },
+  {
+    $lookup: {
+      from: "movies",
+      localField: "_id",
+      foreignField: "_id",
+      as: "movie",
     },
-    {
-        $lookup:{
-            from: "movies",
-            localField: "_id",
-            foreignField: "_id",
-            as: "movie"
-        }
+  },
+  {
+    $project: {
+      _id: 1,
+      sum_rate: 1,
+      nb_rate: 1,
+      "movie.genres": 1,
     },
-    {
-        $project: {
-            _id: 1,
-            sum_rate: 1,
-            nb_rate: 1,
-            "movie.genres":1
-        }
+  },
+  {
+    $unwind: "$movie",
+  },
+  {
+    $project: {
+      _id: 1,
+      sum_rate: 1,
+      nb_rate: 1,
+      genre: "$movie.genres",
     },
-    {
-        $unwind: "$movie"
+  },
+  {
+    $project: {
+      genre: {
+        $split: ["$genre", "|"],
+      },
+      sum_rate: 1,
+      nb_rate: 1,
     },
-    {
-        $project: {
-            _id: 1,
-            sum_rate: 1,
-            nb_rate: 1,
-            genre:"$movie.genres"
-        }
+  },
+  {
+    $unwind: "$genre",
+  },
+  {
+    $group: {
+      _id: "$genre",
+      sum_rate: { $sum: "$sum_rate" },
+      nb_rate: { $sum: "$nb_rate" },
     },
-    {
-        $project: {
-            genre: {
-                $split: ["$genre","|"]
-            }, 
-            sum_rate:1, 
-            nb_rate:1
-        }
+  },
+  {
+    $project: {
+      _id: 0,
+      genre: "$_id",
+      rate: { $divide: ["$sum_rate", "$nb_rate"] },
     },
-    {
-        $unwind: "$genre"
-    },
-    {
-        $group: {
-            _id: "$genre",
-            sum_rate: {$sum: "$sum_rate"},
-            nb_rate: {$sum: "$nb_rate"}
-        }
-    },
-    {
-        $project:
-        {
-            _id:0,
-            genre: "$_id",
-            rate: {$divide:["$sum_rate","$nb_rate"]}
-        }
-    },
-    {
-        $sort: {rate: -1}
-    }
+  },
+  {
+    $sort: { rate: -1 },
+  },
 ]);

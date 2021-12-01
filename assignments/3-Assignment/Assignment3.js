@@ -42,7 +42,7 @@ db.users.insertOne({
   ],
 });
 // Question 9
-
+db.users.findOneAndDelete({},{sort: {_id: -1}});
 // Question 10
 db.users.updateMany(
   { occupation: "programmer" },

@@ -117,7 +117,74 @@ db.users.aggregate([
   { $project: { avg: 0 } },
 ]);
 // Question 24
-
+db.users.aggregate([
+  {
+    $unwind: "$movies",
+  },
+  {
+    $group: {
+      _id: "$movies.movieid",
+      sum_rate: { $sum: "$movies.rating" },
+      nb_rate: { $sum: 1 },
+    },
+  },
+  {
+    $lookup: {
+      from: "movies",
+      localField: "_id",
+      foreignField: "_id",
+      as: "movie",
+    },
+  },
+  {
+    $project: {
+      _id: 1,
+      sum_rate: 1,
+      nb_rate: 1,
+      "movie.genres": 1,
+    },
+  },
+  {
+    $unwind: "$movie",
+  },
+  {
+    $project: {
+      _id: 1,
+      sum_rate: 1,
+      nb_rate: 1,
+      genre: "$movie.genres",
+    },
+  },
+  {
+    $project: {
+      genre: {
+        $split: ["$genre", "|"],
+      },
+      sum_rate: 1,
+      nb_rate: 1,
+    },
+  },
+  {
+    $unwind: "$genre",
+  },
+  {
+    $group: {
+      _id: "$genre",
+      sum_rate: { $sum: "$sum_rate" },
+      nb_rate: { $sum: "$nb_rate" },
+    },
+  },
+  {
+    $project: {
+      _id: 0,
+      genre: "$_id",
+      nb_rate: 1,
+    },
+  },
+  {
+    $sort: { nb_rate: -1 },
+  },
+]);
 // Question 25
 db.users.aggregate([
   {
